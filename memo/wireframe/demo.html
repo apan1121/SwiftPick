@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽獎系統 - 預覽版</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .main-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-step {
+            text-align: center;
+            padding: 10px;
+            margin: 5px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-step.completed {
+            background: rgba(40, 167, 69, 0.8);
+        }
+        
+        .nav-step.active {
+            background: rgba(255, 193, 7, 0.8);
+            transform: scale(1.05);
+        }
+        
+        .nav-step:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .content-area {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .page-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        .page-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .page-header h2 {
+            color: #495057;
+            font-weight: 600;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .participant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .participant-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .participant-card.highlighted {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            border-color: #ffc107;
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+            animation: glow 0.5s ease-in-out;
+        }
+        
+        .participant-card.winner {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border-color: #dc3545;
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
+            transform: scale(1.1);
+        }
+        
+        @keyframes glow {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        
+        .prize-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .prize-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .control-panel {
+            background: #343a40;
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .winner-display {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .participant-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 5px;
+            }
+            
+            .participant-card {
+                padding: 5px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 主導航 -->
+    <div class="main-nav">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <h3><i class="fas fa-dice"></i> 抽獎系統</h3>
+                </div>
+                <div class="col-md-9">
+                    <div class="row">
+                        <div class="col">
+                            <div class="nav-step completed" onclick="showPage('prizes')">
+                                <div><i class="fas fa-trophy"></i></div>
+                                <div>獎項設定</div>
+                                <div><i class="fas fa-check"></i></div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="nav-step completed" onclick="showPage('participants')">
+                                <div><i class="fas fa-users"></i></div>
+                                <div>參與者名單</div>
+                                <div><i class="fas fa-check"></i></div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="nav-step active" onclick="showPage('drawing')">
+                                <div><i class="fas fa-play"></i></div>
+                                <div>開始抽獎</div>
+                                <div>進行中</div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="nav-step" onclick="showPage('results')">
+                                <div><i class="fas fa-chart-bar"></i></div>
+                                <div>結果查看</div>
+                                <div>-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container content-area">
+        <!-- 獎項設定頁面 -->
+        <div id="prizes-page" class="hidden">
+            <div class="page-card">
+                <div class="page-header">
+                    <h2><i class="fas fa-trophy text-warning"></i> 獎項設定</h2>
+                    <div class="float-right">
+                        <button class="btn btn-outline-success btn-sm"><i class="fas fa-download"></i> 匯出CSV</button>
+                        <button class="btn btn-outline-primary btn-sm"><i class="fas fa-upload"></i> 匯入CSV</button>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-section">
+                            <h5>輸入方式</h5>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="inputMethod" id="manual" checked>
+                                <label class="form-check-label" for="manual">手動輸入</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="inputMethod" id="csv">
+                                <label class="form-check-label" for="csv">CSV檔案上傳</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h5>手動輸入區域</h5>
+                            <textarea class="form-control" rows="8" placeholder="特等獎,1&#10;頭獎,3&#10;二獎,5&#10;三獎,10&#10;參加獎,100">特等獎,1
+頭獎,3
+二獎,5
+三獎,10
+參加獎,100</textarea>
+                            <div class="mt-2">
+                                <button class="btn btn-secondary btn-sm">清空</button>
+                                <button class="btn btn-primary btn-sm">解析</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-section">
+                            <h5>獎項預覽列表</h5>
+                            <div class="prize-list">
+                                <div class="prize-item">
+                                    <span><strong>特等獎</strong></span>
+                                    <span>數量: 1 <button class="btn btn-sm btn-outline-secondary">編輯</button></span>
+                                </div>
+                                <div class="prize-item">
+                                    <span><strong>頭獎</strong></span>
+                                    <span>數量: 3 <button class="btn btn-sm btn-outline-secondary">編輯</button></span>
+                                </div>
+                                <div class="prize-item">
+                                    <span><strong>二獎</strong></span>
+                                    <span>數量: 5 <button class="btn btn-sm btn-outline-secondary">編輯</button></span>
+                                </div>
+                                <div class="prize-item">
+                                    <span><strong>三獎</strong></span>
+                                    <span>數量: 10 <button class="btn btn-sm btn-outline-secondary">編輯</button></span>
+                                </div>
+                                <div class="prize-item">
+                                    <span><strong>參加獎</strong></span>
+                                    <span>數量: 100 <button class="btn btn-sm btn-outline-secondary">編輯</button></span>
+                                </div>
+                            </div>
+                            <button class="btn btn-success btn-sm mt-2"><i class="fas fa-plus"></i> 新增</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <div class="stats-card d-inline-block">
+                        <h6>統計：總計 119 個獎項</h6>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-primary btn-lg" onclick="showPage('participants')">下一步 <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 參與者名單頁面 -->
+        <div id="participants-page" class="hidden">
+            <div class="page-card">
+                <div class="page-header">
+                    <h2><i class="fas fa-users text-info"></i> 參與者名單</h2>
+                    <div class="float-right">
+                        <button class="btn btn-outline-success btn-sm"><i class="fas fa-download"></i> 匯出CSV</button>
+                        <button class="btn btn-outline-primary btn-sm"><i class="fas fa-upload"></i> 匯入CSV</button>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-section">
+                            <h5>輸入區域</h5>
+                            <textarea class="form-control" rows="6" placeholder="張三,小張&#10;李四,阿李&#10;王五,小王">張三,小張
+李四,阿李
+王五,小王
+趙六,阿趙
+陳七,小陳</textarea>
+                            <div class="mt-2">
+                                <button class="btn btn-secondary btn-sm">清空</button>
+                                <button class="btn btn-primary btn-sm">解析</button>
+                                <button class="btn btn-warning btn-sm">新增1000筆測試資料</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="form-section">
+                            <h5>上傳CSV檔案</h5>
+                            <div class="custom-file mb-3">
+                                <input type="file" class="custom-file-input" id="csvFile">
+                                <label class="custom-file-label" for="csvFile">選擇檔案</label>
+                            </div>
+                            <button class="btn btn-primary btn-block">上傳</button>
+                            <button class="btn btn-outline-secondary btn-block">示範格式</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-search"></i> 搜尋：<input type="text" class="form-control d-inline-block ml-2" style="width: 200px;" placeholder="搜尋參與者..."></h5>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <h5>總參與人數: <span class="badge badge-primary badge-lg">50,000</span></h5>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h5>參與者名單預覽</h5>
+                    <div class="participant-grid">
+                        <div class="participant-card"><div>張三</div><div>小張</div></div>
+                        <div class="participant-card"><div>李四</div><div>阿李</div></div>
+                        <div class="participant-card"><div>王五</div><div>小王</div></div>
+                        <div class="participant-card"><div>趙六</div><div>阿趙</div></div>
+                        <div class="participant-card"><div>陳七</div><div>小陳</div></div>
+                        <div class="participant-card"><div>劉八</div><div>小劉</div></div>
+                        <div class="participant-card"><div>黃九</div><div>小黃</div></div>
+                        <div class="participant-card"><div>吳十</div><div>阿吳</div></div>
+                        <!-- 更多參與者... -->
+                        <div class="participant-card"><div>周AA</div><div>阿周</div></div>
+                        <div class="participant-card"><div>錢BB</div><div>小錢</div></div>
+                        <div class="participant-card"><div>孫CC</div><div>小孫</div></div>
+                        <div class="participant-card"><div>李DD</div><div>小李</div></div>
+                        <div class="participant-card"><div>吳EE</div><div>阿吳</div></div>
+                        <div class="participant-card"><div>鄭FF</div><div>小鄭</div></div>
+                        <div class="participant-card"><div>王GG</div><div>阿王</div></div>
+                        <div class="participant-card"><div>張HH</div><div>小張</div></div>
+                    </div>
+                    <div class="text-center text-muted mt-2">
+                        <small>（顯示前100行，支援虛擬滾動至50,000筆）</small>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <div class="alert alert-success d-inline-block">
+                        <i class="fas fa-check-circle"></i> 數據驗證通過  重複項目: 0
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-primary btn-lg" onclick="showPage('drawing')">下一步 <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 抽獎主頁面 -->
+        <div id="drawing-page">
+            <div class="page-card">
+                <div class="page-header">
+                    <h2><i class="fas fa-play-circle text-success"></i> 抽獎進行中</h2>
+                    <div class="float-right">
+                        <button class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-volume-up"></i> 音效 ON
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h4>當前獎項: <span class="badge badge-warning badge-lg">特等獎</span> (剩餘: 1名)</h4>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <h4>總參與: <span class="badge badge-info badge-lg">50,000人</span></h4>
+                    </div>
+                </div>
+                
+                <div class="control-panel">
+                    <h5><i class="fas fa-cogs"></i> 抽獎控制</h5>
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <button class="btn btn-success btn-lg mr-2" id="startBtn" onclick="startDrawing()">
+                                <i class="fas fa-play"></i> 開始抽獎
+                            </button>
+                            <button class="btn btn-warning btn-lg mr-2" id="pauseBtn" onclick="pauseDrawing()" disabled>
+                                <i class="fas fa-pause"></i> 暫停
+                            </button>
+                            <button class="btn btn-info btn-lg mr-2" onclick="speedUp()">
+                                <i class="fas fa-forward"></i> 加速
+                            </button>
+                            <button class="btn btn-secondary btn-lg" onclick="restart()">
+                                <i class="fas fa-redo"></i> 重新開始
+                            </button>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <div>速度: <div class="progress d-inline-block" style="width: 100px;"><div class="progress-bar bg-warning" style="width: 60%"></div></div></div>
+                            <div class="mt-2">
+                                <small>動畫狀態: <span id="status">🔥 抽獎中...</span>  已亮燈次數: <span id="count">1,247</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h5>參與者名單</h5>
+                    <div class="participant-grid" id="drawingGrid">
+                        <div class="participant-card"><div>張三</div><div>小張</div></div>
+                        <div class="participant-card"><div>李四</div><div>阿李</div></div>
+                        <div class="participant-card"><div>王五</div><div>小王</div></div>
+                        <div class="participant-card highlighted"><div>趙六</div><div>阿趙</div></div>
+                        <div class="participant-card"><div>陳七</div><div>小陳</div></div>
+                        <div class="participant-card"><div>劉八</div><div>小劉</div></div>
+                        <div class="participant-card"><div>黃九</div><div>小黃</div></div>
+                        <div class="participant-card highlighted"><div>吳十</div><div>阿吳</div></div>
+                        <div class="participant-card"><div>周AA</div><div>阿周</div></div>
+                        <div class="participant-card highlighted"><div>錢BB</div><div>小錢</div></div>
+                        <div class="participant-card"><div>孫CC</div><div>小孫</div></div>
+                        <div class="participant-card"><div>李DD</div><div>小李</div></div>
+                        <div class="participant-card"><div>吳EE</div><div>阿吳</div></div>
+                        <div class="participant-card highlighted"><div>鄭FF</div><div>小鄭</div></div>
+                        <div class="participant-card"><div>王GG</div><div>阿王</div></div>
+                        <div class="participant-card"><div>張HH</div><div>小張</div></div>
+                    </div>
+                </div>
+                
+                <div class="winner-display">
+                    <div>
+                        <h3><i class="fas fa-trophy"></i> 中獎者: <span id="winner">等待抽獎結果...</span></h3>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h5>歷史中獎記錄</h5>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p><strong>頭獎:</strong> 王小明, 張小華, 李小美</p>
+                            <p><strong>二獎:</strong> 陳大偉, 劉小玲, 黃大明, 吳小芳, 鄭大同</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary btn-lg" onclick="showPage('results')">查看完整結果 <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 結果管理頁面 -->
+        <div id="results-page" class="hidden">
+            <div class="page-card">
+                <div class="page-header">
+                    <h2><i class="fas fa-chart-bar text-success"></i> 抽獎結果</h2>
+                    <div class="float-right">
+                        <button class="btn btn-success btn-sm"><i class="fas fa-download"></i> 匯出全部</button>
+                        <button class="btn btn-outline-secondary btn-sm"><i class="fas fa-print"></i> 列印</button>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="form-section">
+                            <h5>中獎名單</h5>
+                            
+                            <div class="mb-3">
+                                <h6><i class="fas fa-trophy text-warning"></i> 特等獎 (1名)</h6>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-check"></i> 王小明 (小王)
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6><i class="fas fa-medal text-primary"></i> 頭獎 (3名)</h6>
+                                <div class="alert alert-primary">
+                                    <i class="fas fa-check"></i> 張小華 (小華)<br>
+                                    <i class="fas fa-check"></i> 李小美 (小美)<br>
+                                    <i class="fas fa-check"></i> 陳大偉 (阿偉)
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6><i class="fas fa-award text-success"></i> 二獎 (5名)</h6>
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check"></i> 劉小玲 (小玲)<br>
+                                    <i class="fas fa-check"></i> 黃大明 (大明)<br>
+                                    <i class="fas fa-check"></i> 吳小芳 (小芳)<br>
+                                    <i class="fas fa-check"></i> 鄭大同 (大同)<br>
+                                    <i class="fas fa-check"></i> 趙小萍 (小萍)
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6><i class="fas fa-ribbon text-info"></i> 三獎 (10名) <button class="btn btn-sm btn-outline-secondary">展開 <i class="fas fa-chevron-down"></i></button></h6>
+                                <h6><i class="fas fa-gift text-secondary"></i> 參加獎 (100名) <button class="btn btn-sm btn-outline-secondary">展開 <i class="fas fa-chevron-down"></i></button></h6>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <input type="text" class="form-control" placeholder="🔍 搜尋中獎者...">
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button class="btn btn-warning mr-2">重新抽獎</button>
+                                <button class="btn btn-secondary">清空</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <div class="form-section">
+                            <h5>統計圖表</h5>
+                            <div class="stats-card text-center mb-3">
+                                <h6>獎項分布圓餅圖</h6>
+                                <div style="height: 200px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <div>
+                                        <i class="fas fa-chart-pie" style="font-size: 48px;"></i><br>
+                                        <small>圖表區域</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="stats-card">
+                                <h6>抽獎統計</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li>• 總參與人數: 50,000</li>
+                                    <li>• 總中獎人數: 119</li>
+                                    <li>• 中獎率: 0.238%</li>
+                                    <li>• 抽獎時間: 15分32秒</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button class="btn btn-outline-warning btn-sm btn-block">匯出特等獎</button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-outline-primary btn-sm btn-block">匯出頭獎</button>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <button class="btn btn-outline-success btn-sm btn-block">匯出二獎</button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-outline-info btn-sm btn-block">匯出三獎</button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline-secondary btn-sm btn-block mt-2">匯出參加獎</button>
+                                <button class="btn btn-success btn-block mt-3">匯出全部</button>
+                            </div>
+                            
+                            <div class="mt-4 text-center">
+                                <button class="btn btn-primary btn-lg">重新開始抽獎</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 頁面切換功能
+        function showPage(pageId) {
+            // 隱藏所有頁面
+            document.querySelectorAll('[id$="-page"]').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // 顯示指定頁面
+            document.getElementById(pageId + '-page').classList.remove('hidden');
+            
+            // 更新導航狀態
+            document.querySelectorAll('.nav-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.querySelector(`[onclick="showPage('${pageId}')"]`).classList.add('active');
+        }
+
+        // 抽獎相關功能
+        let isDrawing = false;
+        let drawingInterval = null;
+        let lightCount = 0;
+
+        function startDrawing() {
+            if (isDrawing) return;
+            
+            isDrawing = true;
+            lightCount = 0;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('status').textContent = '🔥 抽獎中...';
+            document.getElementById('winner').textContent = '抽獎進行中...';
+            
+            // 開始隨機亮燈動畫
+            drawingInterval = setInterval(() => {
+                // 清除所有高亮
+                document.querySelectorAll('.participant-card').forEach(card => {
+                    card.classList.remove('highlighted');
+                });
+                
+                // 隨機高亮幾個參與者
+                const cards = document.querySelectorAll('#drawingGrid .participant-card');
+                const highlightCount = Math.floor(Math.random() * 8) + 3; // 3-10個高亮
+                
+                for (let i = 0; i < highlightCount; i++) {
+                    const randomIndex = Math.floor(Math.random() * cards.length);
+                    cards[randomIndex].classList.add('highlighted');
+                }
+                
+                lightCount++;
+                document.getElementById('count').textContent = lightCount.toLocaleString();
+                
+                // 模擬抽獎結束
+                if (lightCount > 50) {
+                    stopDrawing();
+                }
+            }, 100);
+        }
+
+        function pauseDrawing() {
+            if (!isDrawing) return;
+            
+            clearInterval(drawingInterval);
+            isDrawing = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('status').textContent = '⏸️ 已暫停';
+        }
+
+        function stopDrawing() {
+            clearInterval(drawingInterval);
+            isDrawing = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('status').textContent = '🎉 抽獎完成！';
+            
+            // 清除所有高亮
+            document.querySelectorAll('.participant-card').forEach(card => {
+                card.classList.remove('highlighted');
+            });
+            
+            // 隨機選擇一個中獎者
+            const cards = document.querySelectorAll('#drawingGrid .participant-card');
+            const winnerIndex = Math.floor(Math.random() * cards.length);
+            const winnerCard = cards[winnerIndex];
+            winnerCard.classList.add('winner');
+            
+            const winnerName = winnerCard.querySelector('div').textContent;
+            const winnerNickname = winnerCard.querySelectorAll('div')[1].textContent;
+            document.getElementById('winner').textContent = `🎉 ${winnerName} (${winnerNickname}) 🎉`;
+        }
+
+        function speedUp() {
+            // 加速功能的視覺反馈
+            alert('抽獎速度已加快！');
+        }
+
+        function restart() {
+            if (confirm('確定要重新開始抽獎嗎？')) {
+                clearInterval(drawingInterval);
+                isDrawing = false;
+                lightCount = 0;
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('status').textContent = '等待開始...';
+                document.getElementById('winner').textContent = '等待抽獎結果...';
+                document.getElementById('count').textContent = '0';
+                
+                // 清除所有特殊樣式
+                document.querySelectorAll('.participant-card').forEach(card => {
+                    card.classList.remove('highlighted', 'winner');
+                });
+            }
+        }
+
+        // 初始化顯示抽獎頁面
+        showPage('drawing');
+    </script>
+</body>
+</html>
