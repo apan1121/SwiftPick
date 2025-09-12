@@ -88,7 +88,8 @@ export async function getCampaignsMeta() {
 }
 
 export async function setCampaignsMeta(list) {
-    await setItem(META_KEY, Array.isArray(list) ? list : []);
+    const plain = Array.isArray(list) ? toPlain(list) : [];
+    await setItem(META_KEY, plain);
 }
 
 export async function getCurrentCampaignId() {
@@ -106,7 +107,12 @@ export async function loadCampaign(id) {
 
 export async function saveCampaign(id, data) {
     const payload = data || { prizes: [], participants: [], currentPrizeId: null };
-    await setItem(campKey(id), payload);
+    const safe = {
+        prizes: toPlain(payload.prizes || []),
+        participants: toPlain(payload.participants || []),
+        currentPrizeId: payload.currentPrizeId || null,
+    };
+    await setItem(campKey(id), safe);
 }
 
 export async function deleteCampaign(id) {

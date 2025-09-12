@@ -5,7 +5,6 @@
             <div class="page-card">
                 <div class="page-header d-flex justify-content-between align-items-center">
                     <h2><i class="fas fa-play text-warning"></i> 開始抽獎</h2>
-                    <div class="small text-muted">虛擬清單已啟用；動畫與隨機邏輯已接上</div>
                 </div>
 
                 <div class="control-panel p-3 rounded">
@@ -283,6 +282,8 @@ export default {
             this.ensureCurrentPrize();
             if (!this.currentPrize) return;
             if (this.isDrawing) return;
+            // 每次開始抽獎時重置亮燈次數（全域與區域）
+            this.resetDrawing();
             this.localLightCount = 0;
             this.highlightIds = [];
             this.startDrawing();

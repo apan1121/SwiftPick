@@ -10,12 +10,14 @@
                         <h6 class="text-muted">現有活動</h6>
                         <div v-if="!campaignsMeta.length" class="text-muted small">尚無活動，請於右側建立新的活動。</div>
                         <div class="list-group ld-list">
-                            <button
+                            <div
                                 v-for="c in campaignsMeta"
                                 :key="c.id"
-                                type="button"
                                 class="list-group-item list-group-item-action d-flex align-items-center"
+                                role="button"
+                                tabindex="0"
                                 @click="enter(c)"
+                                @keydown.enter="enter(c)"
                             >
                                 <div class="flex-grow-1 text-left">
                                     <div class="font-weight-bold">{{ c.name || '未命名活動' }}</div>
@@ -23,7 +25,7 @@
                                 </div>
                                 <button class="btn btn-sm btn-outline-secondary mr-2" @click.stop="rename(c)" title="重新命名"><i class="fas fa-edit"></i></button>
                                 <button class="btn btn-sm btn-outline-danger" @click.stop="remove(c)" title="刪除"><i class="fas fa-trash"></i></button>
-                            </button>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
@@ -55,12 +57,13 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import InputModal from 'components/common/InputModal.vue';
+import ConfirmModal from 'components/common/ConfirmModal.vue';
 
 export default {
     name: 'CampaignOverlay',
-    components: { InputModal },
+    components: { InputModal, ConfirmModal },
     data(){
-        return { name: '', showRenameModal: false, renameText: '', renamingId: null };
+        return { name: '', showRenameModal: false, renameText: '', renamingId: null, showDelete: false, deleteTarget: null };
     },
     computed: {
         ...mapGetters([
@@ -91,9 +94,16 @@ export default {
             await this.loadCampaignById(c.id);
         },
         async remove(c){
-            if (!confirm(`確定刪除活動「${c.name}」？`)) return;
+            this.deleteTarget = c;
+            this.showDelete = true;
+        },
+        async confirmDelete(){
+            const c = this.deleteTarget;
+            if (!c) { this.showDelete = false; return; }
             await this.deleteCampaign(c.id);
             await this.loadCampaignsMeta();
+            this.showDelete = false;
+            this.deleteTarget = null;
         },
         rename(c){
             this.renamingId = c.id;
@@ -129,3 +139,10 @@ export default {
 .ld-body{ padding: 16px; max-height: 70vh; overflow: auto; }
 .ld-list{ max-height: 50vh; overflow: auto; }
 </style>
+<ConfirmModal
+    :show="showDelete"
+    title="刪除活動"
+    :message="deleteTarget ? `確定刪除活動「${deleteTarget.name}」？` : ''"
+    @close="showDelete=false"
+    @confirm="confirmDelete"
+/>

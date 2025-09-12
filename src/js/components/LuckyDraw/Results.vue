@@ -31,7 +31,7 @@
                                 <div v-if="pr.winners && pr.winners.length" class="alert alert-light border">
                                     <div v-for="p in winnersOfPrize(pr)" :key="p.id" class="d-flex align-items-center">
                                         <span class="flex-grow-1"><i class="fas fa-check text-success"></i> {{ p.name }} <span class="text-muted">({{ p.nickname }})</span></span>
-                                        <button class="btn btn-sm btn-outline-danger" @click="removeWinner(pr, p)">取消中獎</button>
+                                    <button class="btn btn-sm btn-outline-danger" @click="removeWinner(pr, p)">取消中獎</button>
                                     </div>
                                 </div>
                             </div>
@@ -51,18 +51,26 @@
 
             </div>
         </div>
+        <ConfirmModal
+            :show="showConfirm"
+            :message="confirmMessage"
+            title="確認動作"
+            @close="onClose"
+            @confirm="onConfirm"
+        />
     </div>
 </template>
 
 <script>
 import LuckyDrawNav from './Nav.vue';
 import { mapGetters } from 'vuex';
+import ConfirmModal from 'components/common/ConfirmModal.vue';
 
 export default {
     name: 'Results',
-    components: { LuckyDrawNav },
+    components: { LuckyDrawNav, ConfirmModal },
     data(){
-        return { q: '' };
+        return { q: '', showConfirm: false, confirmMessage: '', confirmAction: null };
     },
     computed: {
         ...mapGetters([
@@ -93,21 +101,27 @@ export default {
             if (!term) return list;
             return list.filter(p => (p.name || '').toLowerCase().includes(term) || (p.nickname || '').toLowerCase().includes(term));
         },
+        openConfirm(msg, fn){ this.confirmMessage = msg; this.confirmAction = fn; this.showConfirm = true; },
+        onConfirm(){ const fn = this.confirmAction; this.showConfirm = false; this.confirmAction = null; if (typeof fn === 'function') fn(); },
+        onClose(){ this.showConfirm = false; this.confirmAction = null; },
         removeWinner(pr, p){
-            if (!confirm(`確定取消 ${p.name} 的中獎資格？`)) return;
-            this.$store.dispatch('unmarkWinners', [p.id]);
-            this.$store.dispatch('removeWinnersFromPrize', { prizeId: pr.id, winnerIds: [p.id] });
+            this.openConfirm(`確定取消 ${p.name} 的中獎資格？`, () => {
+                this.$store.dispatch('unmarkWinners', [p.id]);
+                this.$store.dispatch('removeWinnersFromPrize', { prizeId: pr.id, winnerIds: [p.id] });
+            });
         },
         clearPrize(pr){
-            if (!confirm(`確定清空「${pr.name}」的中獎名單？`)) return;
-            const ids = (pr.winners || []).slice();
-            if (ids.length) this.$store.dispatch('unmarkWinners', ids);
-            this.$store.dispatch('clearPrizeWinners', pr.id);
+            this.openConfirm(`確定清空「${pr.name}」的中獎名單？`, () => {
+                const ids = (pr.winners || []).slice();
+                if (ids.length) this.$store.dispatch('unmarkWinners', ids);
+                this.$store.dispatch('clearPrizeWinners', pr.id);
+            });
         },
         async clearAllConfirm(){
-            if (!confirm('確定要清空所有資料？此動作無法復原。')) return;
-            await this.$store.dispatch('clearStorage');
-            location.reload();
+            this.openConfirm('確定要清空所有資料？此動作無法復原。', async () => {
+                await this.$store.dispatch('clearStorage');
+                location.reload();
+            });
         },
         exportAll(){
             const rows = [];

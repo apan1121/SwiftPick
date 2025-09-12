@@ -49,6 +49,13 @@
                     </router-link>
                 </div>
             </div>
+            <ConfirmModal
+                :show="showConfirm"
+                :message="confirmMessage"
+                title="確認動作"
+                @close="onClose"
+                @confirm="onConfirm"
+            />
         </div>
     </div>
 </template>
@@ -56,15 +63,19 @@
 <script>
 import LuckyDrawNav from './Nav.vue';
 import { mapActions, mapGetters } from 'vuex';
+import ConfirmModal from 'components/common/ConfirmModal.vue';
 import { parseText, parseCsvFile, parseParticipantsRows, generateParticipants } from 'services/csv';
 
 export default {
     name: 'ParticipantList',
-    components: { LuckyDrawNav },
+    components: { LuckyDrawNav, ConfirmModal },
     data(){
         return {
             text: '',
             errors: [],
+            showConfirm: false,
+            confirmMessage: '',
+            confirmAction: null,
         };
     },
     computed: {
@@ -100,10 +111,14 @@ export default {
             const items = generateParticipants(n || 1000);
             this.setParticipants(items);
         },
+        openConfirm(msg, fn){ this.confirmMessage = msg; this.confirmAction = fn; this.showConfirm = true; },
+        onConfirm(){ const fn = this.confirmAction; this.showConfirm = false; this.confirmAction = null; if (typeof fn === 'function') fn(); },
+        onClose(){ this.showConfirm = false; this.confirmAction = null; },
         clearAll(){
-            if (!confirm('確定要清空參與者名單？')) return;
-            this.setParticipants([]);
-            this.$store.dispatch('saveToStorage');
+            this.openConfirm('確定要清空參與者名單？', () => {
+                this.setParticipants([]);
+                this.$store.dispatch('saveToStorage');
+            });
         },
         exportCsv(){
             const lines = (this.participants || []).map(p => `${p.name},${p.nickname || ''}`);
@@ -124,4 +139,4 @@ export default {
 .page-card{ background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.06); padding: 24px; }
 .page-header{ border-bottom: 2px solid #e9ecef; padding-bottom: 12px; margin-bottom: 20px; }
 .form-section{ background: #f8f9fa; border-radius: 8px; padding: 16px; margin: 16px 0; }
-</style>
+ </style>

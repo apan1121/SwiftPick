@@ -53,6 +53,13 @@
                 </div>
             </div>
         </div>
+        <ConfirmModal
+            :show="showConfirm"
+            :message="confirmMessage"
+            title="確認動作"
+            @close="onClose"
+            @confirm="onConfirm"
+        />
     </div>
     
 </template>
@@ -60,15 +67,22 @@
 <script>
 import LuckyDrawNav from './Nav.vue';
 import { mapActions, mapGetters } from 'vuex';
+import ConfirmModal from 'components/common/ConfirmModal.vue';
 import { parseText, parseCsvFile, parsePrizesRows } from 'services/csv';
 
 export default {
     name: 'PrizeSetup',
-    components: { LuckyDrawNav },
+    components: {
+        LuckyDrawNav,
+        ConfirmModal,
+    },
     data(){
         return {
             text: '',
             errors: [],
+            showConfirm: false,
+            confirmMessage: '',
+            confirmAction: null,
         };
     },
     computed: {
@@ -81,6 +95,9 @@ export default {
         ...mapActions([
             'setPrizes',
         ]),
+        openConfirm(msg, fn){ this.confirmMessage = msg; this.confirmAction = fn; this.showConfirm = true; },
+        onConfirm(){ const fn = this.confirmAction; this.showConfirm = false; this.confirmAction = null; if (typeof fn === 'function') fn(); },
+        onClose(){ this.showConfirm = false; this.confirmAction = null; },
         manualSave(){
             this.$store.dispatch('saveToStorage');
             alert('已儲存到本機');
@@ -92,9 +109,10 @@ export default {
             if (items.length) this.setPrizes(items);
         },
         clearAll(){
-            if (!confirm('確定要清空所有獎項？')) return;
-            this.setPrizes([]);
-            this.$store.dispatch('saveToStorage');
+            this.openConfirm('確定要清空所有獎項？', () => {
+                this.setPrizes([]);
+                this.$store.dispatch('saveToStorage');
+            });
         },
         async onFileChange(e){
             const file = e.target.files && e.target.files[0];
@@ -106,7 +124,6 @@ export default {
             this.$refs.fileInput.value = '';
         },
         exportCsv(){
-            // 簡單導出（不引入轉換器）：手動組字串
             const lines = (this.prizes || []).map(p => `${p.name},${p.quantity}`);
             const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -125,4 +142,11 @@ export default {
 .page-card{ background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.06); padding: 24px; }
 .page-header{ border-bottom: 2px solid #e9ecef; padding-bottom: 12px; margin-bottom: 20px; }
 .form-section{ background: #f8f9fa; border-radius: 8px; padding: 16px; margin: 16px 0; }
-</style>
+ </style>
+<ConfirmModal
+    :show="showConfirm"
+    :message="confirmMessage"
+    title="確認動作"
+    @close="onClose"
+    @confirm="onConfirm"
+/>
