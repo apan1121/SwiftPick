@@ -26,7 +26,7 @@
                         <div class="text-right small">
                             <div>
                                 當前獎項：
-                                <strong class="prize-link" @click="openPrizeModal">{{ currentPrize ? currentPrize.name : '未選擇' }}</strong>
+                                <strong>{{ currentPrize ? currentPrize.name : '未選擇' }}</strong>
                                 （剩餘 {{ remainingQuantity }} 名）
                             </div>
                             <div class="mt-1">亮燈次數：{{ lightCount }} | 速度(ms)：{{ tickInterval }}</div>
