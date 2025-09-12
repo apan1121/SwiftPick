@@ -1,10 +1,12 @@
 <template>
     <div class="vue-webpack-basic">
         <router-view></router-view>
+        <CampaignOverlay />
     </div>
 </template>
 <script>
 import { mapActions, mapMutations, mapGetters } from 'vuex';
+import CampaignOverlay from 'components/LuckyDraw/CampaignOverlay.vue';
 // import { detectAnyAdblocker } from 'just-detect-adblock';
 
 const pc_min_size = 567;
@@ -16,7 +18,7 @@ const pc_min_size = 567;
 
 export default {
     name: 'MainPage',
-    components: {},
+    components: { CampaignOverlay },
     filters: {},
     props: {},
     data(){

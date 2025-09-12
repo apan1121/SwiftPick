@@ -2,11 +2,21 @@
     <div class="ld-nav">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-md-3 title">
+                <div class="col-md-4 title d-flex align-items-center">
                     <i class="fas fa-dice"></i>
-                    <span> 抽獎系統</span>
+                    <span class="ml-1"> 抽獎系統</span>
+                    <span
+                        v-if="currentCampaignName"
+                        class="badge badge-light ml-2"
+                        style="cursor: pointer;"
+                        title="點擊重新命名活動"
+                        @click="renameCurrentCampaign"
+                    >
+                        {{ currentCampaignName }}
+                    </span>
+                    <button class="btn btn-sm btn-outline-light ml-2" @click="openSwitch"><i class="fas fa-exchange-alt"></i> 切換活動</button>
                 </div>
-                <div class="col-md-9">
+                <div class="col-md-8">
                     <div class="row">
                         <div class="col" v-for="(step, idx) in steps" :key="step.name">
                             <router-link :to="{ name: step.name }"
@@ -25,19 +35,33 @@
                 </div>
             </div>
         </div>
+        <InputModal
+            :show="showRenameModal"
+            title="重新命名活動"
+            label="活動名稱"
+            placeholder="請輸入活動名稱"
+            v-model="renameText"
+            :min-length="1"
+            @close="showRenameModal=false"
+            @confirm="confirmRename"
+        />
     </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
+import InputModal from 'components/common/InputModal.vue';
 
 export default {
     name: 'LuckyDrawNav',
+    components: { InputModal },
     computed: {
         ...mapGetters([
             'totalParticipants',
             'totalPrizeQuantity',
             'prizes',
+            'currentCampaignName',
+            'currentCampaignId',
         ]),
         steps(){
             return [
@@ -55,6 +79,28 @@ export default {
             return (this.prizes || []).reduce((sum, pr) => sum + ((pr.winners || []).length), 0);
         },
     },
+    methods: {
+        ...mapActions(['openCampaignOverlay', 'renameCampaign']),
+        openSwitch(){ this.openCampaignOverlay(); },
+        renameCurrentCampaign(){
+            if (!this.currentCampaignId) return;
+            this.renameText = this.currentCampaignName || '';
+            this.showRenameModal = true;
+        },
+        confirmRename(name){
+            if (!this.currentCampaignId) return;
+            const v = String(name || '').trim();
+            if (!v) return;
+            this.renameCampaign({ id: this.currentCampaignId, name: v });
+            this.showRenameModal = false;
+        },
+    },
+    data(){
+        return {
+            showRenameModal: false,
+            renameText: '',
+        };
+    },
 };
 </script>
 
@@ -67,3 +113,5 @@ export default {
 .nav-step.completed{ background: rgba(40,167,69,.85); }
 .nav-step:hover{ background: rgba(255,255,255,.2); text-decoration:none; }
 </style>
+
+ 

@@ -38,8 +38,8 @@ const app = createApp({
     },
     methods: {
         int(){
-            // 嘗試從 IndexedDB 載入既有資料
-            this.$store.dispatch('loadFromStorage');
+            // 載入活動清單與當前活動；若無則於 CampaignPicker 選擇/新增
+            this.$store.dispatch('initCampaigns');
         },
         ...mapActions([]),
         ...mapMutations([]),

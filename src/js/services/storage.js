@@ -36,6 +36,16 @@ async function getItem(key) {
     });
 }
 
+async function delItem(key) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        const req = tx.objectStore(STORE).delete(key);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error || req.error);
+    });
+}
+
 function toPlain(obj){
     try {
         // Prefer structuredClone when available (keeps types), fallback to JSON deep copy
@@ -68,4 +78,56 @@ export async function clearAll() {
     });
 }
 
-export default { saveAll, loadAll, clearAll };
+// --- Multi-campaign support ---
+const META_KEY = 'campaigns_meta';
+const CURRENT_KEY = 'currentCampaignId';
+const campKey = (id) => `campaign:${id}`;
+
+export async function getCampaignsMeta() {
+    return (await getItem(META_KEY)) || [];
+}
+
+export async function setCampaignsMeta(list) {
+    await setItem(META_KEY, Array.isArray(list) ? list : []);
+}
+
+export async function getCurrentCampaignId() {
+    return (await getItem(CURRENT_KEY)) || null;
+}
+
+export async function setCurrentCampaignId(id) {
+    await setItem(CURRENT_KEY, id || null);
+}
+
+export async function loadCampaign(id) {
+    const payload = await getItem(campKey(id));
+    return payload || { prizes: [], participants: [], currentPrizeId: null };
+}
+
+export async function saveCampaign(id, data) {
+    const payload = data || { prizes: [], participants: [], currentPrizeId: null };
+    await setItem(campKey(id), payload);
+}
+
+export async function deleteCampaign(id) {
+    await delItem(campKey(id));
+    const meta = await getCampaignsMeta();
+    const next = meta.filter(m => m.id !== id);
+    await setCampaignsMeta(next);
+    const cur = await getCurrentCampaignId();
+    if (cur === id) await setCurrentCampaignId(null);
+}
+
+export default {
+    saveAll,
+    loadAll,
+    clearAll,
+    // campaigns
+    getCampaignsMeta,
+    setCampaignsMeta,
+    getCurrentCampaignId,
+    setCurrentCampaignId,
+    loadCampaign,
+    saveCampaign,
+    deleteCampaign,
+};
