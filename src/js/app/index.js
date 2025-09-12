@@ -10,6 +10,7 @@ import { createI18ns, mixinsI18ns } from 'lib/i18n';
 
 const store = createStores([
     'common',
+    'luckyDraw',
 ]);
 const router = createRoutes(store);
 const i18n = createI18ns();
@@ -37,6 +38,8 @@ const app = createApp({
     },
     methods: {
         int(){
+            // 嘗試從 IndexedDB 載入既有資料
+            this.$store.dispatch('loadFromStorage');
         },
         ...mapActions([]),
         ...mapMutations([]),

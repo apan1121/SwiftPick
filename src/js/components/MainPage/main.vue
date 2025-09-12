@@ -1,12 +1,5 @@
 <template>
     <div class="vue-webpack-basic">
-        <router-link class="nav-link" :to="{ name: 'A'}">
-            <span>A</span>
-        </router-link>
-        <router-link class="nav-link" :to="{ name: 'B'}">
-            <span>B</span>
-        </router-link>
-        {{ $t('common.WebsiteTitle') }}
         <router-view></router-view>
     </div>
 </template>

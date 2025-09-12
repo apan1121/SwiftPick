@@ -1,7 +1,7 @@
 @import '../common/_variable.scss';
 
 #appBox{
-    padding-top: 4rem;
+    padding-top: 0; // remove extra top whitespace for LuckyDraw pages
 }
 
 .navbar {

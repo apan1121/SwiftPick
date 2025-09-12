@@ -7,13 +7,32 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 const routes = [
     {
         path: '/',
-        name: 'A',
-        component: () => import('components/A/main.vue'),
+        redirect: { name: 'ParticipantList' },
+    },
+    // LuckyDraw pages
+    {
+        path: '/prizes',
+        name: 'PrizeSetup',
+        component: () => import('components/LuckyDraw/PrizeSetup.vue'),
+        meta: { type: 'page' },
     },
     {
-        path: '/B',
-        name: 'B',
-        component: () => import('components/B/main.vue'),
+        path: '/participants',
+        name: 'ParticipantList',
+        component: () => import('components/LuckyDraw/ParticipantList.vue'),
+        meta: { type: 'page' },
+    },
+    {
+        path: '/drawing',
+        name: 'DrawingBoard',
+        component: () => import('components/LuckyDraw/DrawingBoard.vue'),
+        meta: { type: 'page' },
+    },
+    {
+        path: '/results',
+        name: 'Results',
+        component: () => import('components/LuckyDraw/Results.vue'),
+        meta: { type: 'page' },
     },
 ];
 
@@ -71,28 +90,15 @@ export const createRoutes = (store) => {
     });
 
     router.beforeEach(async (to, from) => {
-        let auth = true;
-        // console.log(to, from);
-        // if (!['NotFound'].includes(to.name)) {
-        //     const matchRouter = to.matched[to.matched.length - 1];
-        //     const params = {
-        //         route_name: matchRouter.name,
-        //         type: to.meta.type,
-        //         data: {
-        //             ...to.params,
-        //             ...to.query,
-        //         },
-        //         url: to.fullPath,
-        //         uri: matchRouter.path,
-        //     };
-        //     auth = await checkPageAuth(params);
-        //     if (auth) {
-        //         if (from.href) {
-        //             jsVars.set('referer', from.href);
-        //         }
-        //     }
-        // }
-        // return auth;
+        // Basic guards for LuckyDraw flow
+        const getters = store.getters || {};
+        if (to.name === 'DrawingBoard') {
+            const hasPrizes = (getters.totalPrizeQuantity || 0) > 0;
+            const hasParticipants = (getters.totalParticipants || 0) > 0;
+            if (!hasPrizes) return { name: 'PrizeSetup' };
+            if (!hasParticipants) return { name: 'ParticipantList' };
+        }
+        return true;
     });
 
     router.afterEach((to, from, failure) => {

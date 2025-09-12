@@ -169,6 +169,7 @@ const JS_CONFIG = {
             app$: path.join(JS_DIR, '/app/app.js'),
             vendor: path.join(JS_DIR, '/vendor'),
             lib: path.join(JS_DIR, '/lib'),
+            services: path.join(JS_DIR, '/services'),
             components: path.join(JS_DIR, '/components'),
             router: path.join(JS_DIR, '/router'),
             lang: path.join(JS_DIR, '/lang'),
