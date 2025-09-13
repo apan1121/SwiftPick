@@ -4,17 +4,12 @@
             <div class="row align-items-center">
                 <div class="col-md-4 title d-flex align-items-center">
                     <i class="fas fa-dice"></i>
-                    <span class="ml-1"> 抽獎系統</span>
-                    <span
-                        v-if="currentCampaignName"
-                        class="badge badge-light ml-2"
-                        style="cursor: pointer;"
-                        title="點擊重新命名活動"
-                        @click="renameCurrentCampaign"
-                    >
-                        {{ currentCampaignName }}
+                    <span class="ml-1 title-name" :title="currentCampaignName || '抽獎系統'" @click="currentCampaignName && renameCurrentCampaign()" style="cursor: pointer;">
+                        {{ currentCampaignName || '抽獎系統' }}
                     </span>
-                    <button class="btn btn-sm btn-outline-light ml-2" @click="openSwitch"><i class="fas fa-exchange-alt"></i> 切換活動</button>
+                    <button class="btn btn-link btn-icon ml-2 p-0" @click="openSwitch" :title="'切換活動'">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
                 </div>
                 <div class="col-md-8">
                     <div class="row">
@@ -112,6 +107,14 @@ export default {
 .nav-step.active{ background: rgba(255,193,7,.85); transform: scale(1.03); color:#212529; }
 .nav-step.completed{ background: rgba(40,167,69,.85); }
 .nav-step:hover{ background: rgba(255,255,255,.2); text-decoration:none; }
+.title-name{ line-height: 1.1; }
+.btn-icon{ color: #fff; }
+.btn-icon:hover{ color: #ffe; text-decoration: none; }
+/* 手機與平板寬度（<=992px）僅顯示 icon */
+@media (max-width: 992px){
+  .nav-step{ padding:8px; }
+  .nav-step .label, .nav-step .state{ display: none; }
+}
 </style>
 
  

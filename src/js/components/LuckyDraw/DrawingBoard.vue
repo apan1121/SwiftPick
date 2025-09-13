@@ -3,27 +3,27 @@
         <LuckyDrawNav />
         <div class="container-fluid content-area">
             <div class="page-card">
-                <div class="page-header d-flex justify-content-between align-items-center">
+                <div class="page-header d-flex justify-content-between align-items-center flex-column flex-md-row align-items-start align-items-md-center">
                     <h2><i class="fas fa-play text-warning"></i> 開始抽獎</h2>
                 </div>
 
                 <div class="control-panel p-3 rounded">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <div class="mr-3 d-flex align-items-center">
+                    <div class="control-top d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+                        <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center">
+                            <div class="d-flex align-items-center control-select w-100 mb-2 mb-lg-0 mr-lg-3">
                                 <label class="mb-0 mr-2">獎項</label>
-                                <select class="form-control form-control-sm" style="width:220px" v-model="selectedPrizeId" @change="onPrizeChange">
+                                <select class="form-control form-control-sm" v-model="selectedPrizeId" @change="onPrizeChange">
                                     <option v-for="pr in prizes" :key="pr.id" :value="pr.id" :disabled="prizeRemain(pr) <= 0">
                                         {{ pr.name }}（剩 {{ prizeRemain(pr) }}）
                                     </option>
                                 </select>
                             </div>
-                            <button class="btn btn-success mr-2" :disabled="isDrawing || !eligibleCount" @click="start"><i class="fas fa-play"></i> 開始抽獎</button>
-                            <button class="btn btn-warning mr-2" :disabled="!isDrawing" @click="pause"><i class="fas fa-pause"></i> 暫停</button>
-                            <button class="btn btn-info mr-2" :disabled="!isDrawing" @click="speedUp"><i class="fas fa-forward"></i> 加速</button>
-                            <button class="btn btn-secondary" @click="restart"><i class="fas fa-redo"></i> 重新開始</button>
+                            <div class="control-actions d-flex flex-wrap mt-0 mt-lg-0">
+                                <button class="btn btn-success" :disabled="isDrawing || !eligibleCount" @click="start"><i class="fas fa-play"></i> 開始抽獎</button>
+                                <button class="btn btn-warning" :disabled="!isDrawing" @click="pause"><i class="fas fa-pause"></i> 暫停</button>
+                            </div>
                         </div>
-                        <div class="text-right small">
+                        <div class="status-section small text-md-right mt-2 mt-md-0">
                             <div>
                                 當前獎項：
                                 <strong>{{ currentPrize ? currentPrize.name : '未選擇' }}</strong>
@@ -295,15 +295,7 @@ export default {
             if (this._rafId) cancelAnimationFrame(this._rafId);
             this._rafId = null;
         },
-        speedUp(){
-            this.tickInterval = Math.max(20, Math.floor(this.tickInterval * 0.75));
-        },
-        restart(){
-            this.pause();
-            this.resetDrawing();
-            this.highlightIds = [];
-            this.localLightCount = 0;
-        },
+        
         incLights(){
             let v = Number(this.stopAfterLights) || 0;
             v = Math.min(500, v + 5);
@@ -464,6 +456,17 @@ export default {
 .control-panel .settings-row{ border-top: 1px solid rgba(255,255,255,.08); padding-top: 8px; }
 .control-panel .settings-row{ font-size: 0.85rem; }
 .control-panel .settings-row .btn, .control-panel .settings-row .form-control{ font-size: 0.85rem; }
+.control-actions{ gap: 12px; margin-left: 8px; }
+@media (max-width: 768px){
+  .control-panel .settings-row{ justify-content: flex-start !important; }
+  .control-select select{ width: 100% !important; max-width: 100%; }
+}
+@media (min-width: 992px){
+  .control-select{ width: auto; }
+  .control-select select{ width: 280px; max-width: 320px; }
+  .control-actions{ margin-left: 16px; flex-wrap: nowrap; }
+  .control-actions .btn{ white-space: nowrap; }
+}
 .form-section{ background: #f8f9fa; border-radius: 8px; padding: 16px; margin: 16px 0; }
 .winner-display{ background: linear-gradient(45deg, #ff6b6b, #ee5a52); color:#fff; border-radius: 10px; padding: 24px; text-align:center; }
 .virtual-container{ height: 420px; overflow: auto; border: 2px solid #e9ecef; border-radius: 8px; background: #fff; position: relative; }

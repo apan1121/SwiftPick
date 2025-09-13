@@ -5,7 +5,7 @@
             <div class="page-card">
                 <div class="page-header d-flex justify-content-between align-items-center">
                     <h2><i class="fas fa-chart-bar text-success"></i> 抽獎結果</h2>
-                    <div>
+                    <div class="header-actions d-flex align-items-center">
                         <button class="btn btn-success btn-sm" :disabled="!hasWinners" @click="exportAll"><i class="fas fa-download"></i> 匯出全部</button>
                         <button class="btn btn-outline-secondary btn-sm" @click="printPage"><i class="fas fa-print"></i> 列印</button>
                     </div>
@@ -14,22 +14,22 @@
                 <div class="row">
                     <div class="col-md-7">
                         <div class="form-section">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5>中獎名單</h5>
-                                <div>
-                                    <button class="btn btn-outline-danger btn-sm mr-2" @click="clearAllConfirm">清空所有資料</button>
-                                    <input type="search" placeholder="搜尋中獎者..." class="form-control form-control-sm d-inline-block" style="width:220px" v-model="q" />
+                            <div class="toolbar d-flex flex-wrap align-items-center justify-content-between">
+                                <h5 class="mb-2 mb-sm-0">中獎名單</h5>
+                                <div class="tools d-flex align-items-center flex-wrap">
+                                    <button class="btn btn-outline-danger btn-sm" @click="clearAllConfirm">清空所有資料</button>
+                                    <input type="search" placeholder="搜尋中獎者..." class="form-control form-control-sm" style="width:260px" v-model="q" />
                                 </div>
                             </div>
                             <div v-if="!hasWinners" class="alert alert-info mt-2">尚無中獎紀錄。</div>
                             <div v-for="pr in prizes" :key="pr.id" class="mb-3">
-                                <h6 class="d-flex align-items-center">
+                                <h6 class="d-flex align-items-center prize-header">
                                     <span class="flex-grow-1"><i class="fas fa-trophy text-warning"></i> {{ pr.name }} ({{ pr.quantity }}名)</span>
                                     <button class="btn btn-sm btn-outline-danger mr-2" :disabled="!pr.winners || !pr.winners.length" @click="clearPrize(pr)">清空本獎項</button>
                                     <button class="btn btn-sm btn-outline-secondary" :disabled="!pr.winners || !pr.winners.length" @click="exportPrize(pr)">匯出</button>
                                 </h6>
-                                <div v-if="pr.winners && pr.winners.length" class="alert alert-light border">
-                                    <div v-for="p in winnersOfPrize(pr)" :key="p.id" class="d-flex align-items-center">
+                                <div v-if="pr.winners && pr.winners.length" class="alert alert-light border mt-2">
+                                    <div v-for="p in winnersOfPrize(pr)" :key="p.id" class="winner-row d-flex align-items-center">
                                         <span class="flex-grow-1"><i class="fas fa-check text-success"></i> {{ p.name }} <span class="text-muted">({{ p.nickname }})</span></span>
                                     <button class="btn btn-sm btn-outline-danger" @click="removeWinner(pr, p)">取消中獎</button>
                                     </div>
@@ -160,4 +160,10 @@ export default {
 .page-card{ background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.06); padding: 24px; }
 .page-header{ border-bottom: 2px solid #e9ecef; padding-bottom: 12px; margin-bottom: 20px; }
 .form-section{ background: #f8f9fa; border-radius: 8px; padding: 16px; margin: 16px 0; }
+.toolbar{ gap: 10px; }
+.tools{ gap: 10px; }
+.prize-header{ margin-top: 10px; padding-top: 6px; border-top: 1px dashed #e9ecef; }
+.winner-row{ padding: 6px 0; }
+.winner-row + .winner-row{ border-top: 1px dashed #eee; margin-top: 8px; padding-top: 12px; }
+.header-actions{ gap: 10px; }
 </style>

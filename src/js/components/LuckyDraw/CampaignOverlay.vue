@@ -25,6 +25,7 @@
                                 </div>
                                 <button class="btn btn-sm btn-outline-secondary mr-2" @click.stop="rename(c)" title="重新命名"><i class="fas fa-edit"></i></button>
                                 <button class="btn btn-sm btn-outline-danger" @click.stop="remove(c)" title="刪除"><i class="fas fa-trash"></i></button>
+                                <i class="fas fa-chevron-right text-muted ml-2 chev"></i>
                             </div>
                         </div>
                     </div>
@@ -138,6 +139,12 @@ export default {
 .ld-header{ padding: 14px 16px; border-bottom: 1px solid #eee; }
 .ld-body{ padding: 16px; max-height: 70vh; overflow: auto; }
 .ld-list{ max-height: 50vh; overflow: auto; }
+.ld-list .list-group-item[role="button"]{ cursor: pointer; }
+.ld-list .list-group-item[role="button"]:hover{ background: #f8f9fa; }
+.ld-list .list-group-item{ border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 8px; transition: background-color .12s ease, border-color .12s ease; }
+.ld-list .list-group-item:hover{ background: #f8f9fb; border-color: #dfe3e6; }
+.ld-list .chev{ opacity: .5; transition: opacity .12s ease, transform .12s ease; }
+.ld-list .list-group-item:hover .chev{ opacity: 1; transform: translateX(1px); }
 </style>
 <ConfirmModal
     :show="showDelete"

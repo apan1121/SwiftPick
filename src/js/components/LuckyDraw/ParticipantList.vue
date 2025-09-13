@@ -3,9 +3,9 @@
         <LuckyDrawNav />
         <div class="container content-area">
             <div class="page-card">
-                <div class="page-header d-flex justify-content-between align-items-center">
+                <div class="page-header d-flex justify-content-between align-items-center flex-column flex-md-row align-items-start align-items-md-center">
                     <h2><i class="fas fa-users text-info"></i> 參與者名單</h2>
-                    <div>
+                    <div class="header-actions d-flex flex-wrap mt-2 mt-md-0">
                         <button class="btn btn-outline-secondary btn-sm mr-1" @click="manualSave"><i class="fas fa-save"></i> 手動儲存</button>
                         <button class="btn btn-outline-danger btn-sm mr-1" :disabled="!participants.length" @click="clearAll"><i class="fas fa-trash"></i> 清空名單</button>
                         <button class="btn btn-outline-success btn-sm" :disabled="!participants.length" @click="exportCsv"><i class="fas fa-download"></i> 匯出CSV</button>
@@ -22,7 +22,7 @@
                             <h5>Textarea 輸入</h5>
                             <small class="text-muted">格式：姓名,暱稱（每行一筆；暱稱可留空）</small>
                             <textarea v-model="text" class="form-control" rows="6" placeholder="張三,小張\n李四,阿李"></textarea>
-                            <div class="mt-2">
+                            <div class="mt-2 btn-row d-flex flex-wrap">
                                 <button class="btn btn-secondary btn-sm" @click="text=''">清空</button>
                                 <button class="btn btn-primary btn-sm" @click="parseFromText">解析</button>
                                 <button class="btn btn-warning btn-sm" @click="addDemo(1000)">新增1000筆測試資料</button>
@@ -139,4 +139,6 @@ export default {
 .page-card{ background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.06); padding: 24px; }
 .page-header{ border-bottom: 2px solid #e9ecef; padding-bottom: 12px; margin-bottom: 20px; }
 .form-section{ background: #f8f9fa; border-radius: 8px; padding: 16px; margin: 16px 0; }
- </style>
+.header-actions{ gap: 8px; }
+.btn-row{ gap: 8px; }
+</style>
