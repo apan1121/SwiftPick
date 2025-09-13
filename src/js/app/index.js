@@ -47,6 +47,7 @@ const app = createApp({
             // 載入活動清單與當前活動；若無則於 CampaignPicker 選擇/新增
             this.$store.dispatch('initCampaigns').finally(() => {
                 this.setTitle();
+                this.loadTheme();
             });
         },
         setTitle(){
@@ -60,6 +61,17 @@ const app = createApp({
                 this.setMeta('description', desc);
                 this.setOG('og:title', title);
                 this.setOG('og:description', desc);
+            } catch (e) {}
+        },
+        loadTheme(){
+            try {
+                const raw = localStorage.getItem('theme');
+                if (!raw) return;
+                const t = JSON.parse(raw);
+                const root = document.documentElement.style;
+                if (t.start) root.setProperty('--brand-start', t.start);
+                if (t.end) root.setProperty('--brand-end', t.end);
+                if (t.primary) root.setProperty('--primary', t.primary);
             } catch (e) {}
         },
         setMeta(name, content){

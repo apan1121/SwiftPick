@@ -10,6 +10,9 @@
                     <button class="btn btn-link btn-icon ml-2 p-0" @click="openSwitch" :title="'切換活動'">
                         <i class="fas fa-exchange-alt"></i>
                     </button>
+                    <button class="btn btn-link btn-icon ml-2 p-0" @click="openTheme" :title="'網站色調設定'">
+                        <i class="fas fa-palette"></i>
+                    </button>
                 </div>
                 <div class="col-md-8">
                     <div class="row">
@@ -40,16 +43,18 @@
             @close="showRenameModal=false"
             @confirm="confirmRename"
         />
+        <ThemeModal :show="showThemeModal" @close="showThemeModal=false" />
     </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import InputModal from 'components/common/InputModal.vue';
+import ThemeModal from 'components/common/ThemeModal.vue';
 
 export default {
     name: 'LuckyDrawNav',
-    components: { InputModal },
+    components: { InputModal, ThemeModal },
     computed: {
         ...mapGetters([
             'totalParticipants',
@@ -89,18 +94,22 @@ export default {
             this.renameCampaign({ id: this.currentCampaignId, name: v });
             this.showRenameModal = false;
         },
+        openTheme(){ this.showThemeModal = true; },
     },
     data(){
         return {
             showRenameModal: false,
             renameText: '',
+            showThemeModal: false,
         };
     },
 };
 </script>
 
 <style lang="scss" scoped>
-.ld-nav{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 12px 0; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+.ld-nav{ background: linear-gradient(135deg, #0ea5e9 0%, #14b8a6 100%); color: #fff; padding: 12px 0; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+/* 以 CSS 變數控制品牌色 */
+.ld-nav{ background: linear-gradient(135deg, var(--brand-start, #0ea5e9) 0%, var(--brand-end, #14b8a6) 100%); }
 .title{ font-weight: 600; }
 .nav-step{ display:block; text-align:center; padding:10px; margin:5px; border-radius:8px; background: rgba(255,255,255,.1); color:#fff; text-decoration:none; transition:.2s; }
 .nav-step .icon{ margin-bottom: 4px; }
