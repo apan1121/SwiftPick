@@ -22,13 +22,19 @@ const app = createApp({
     filters: {},
     data(){
         return {
+            SITE_TITLE: '抽獎大師',
+            SITE_DESC: '專業等級抽獎工具：公平隨機、流暢動畫、結果匯出與本機保存；適合 FB 粉專、公司尾牙。',
         };
     },
     computed: {
         ...mapGetters([
+            'currentCampaignName',
         ]),
     },
     watch: {
+        currentCampaignName(){
+            this.setTitle();
+        },
     },
     created(){
     },
@@ -39,7 +45,44 @@ const app = createApp({
     methods: {
         int(){
             // 載入活動清單與當前活動；若無則於 CampaignPicker 選擇/新增
-            this.$store.dispatch('initCampaigns');
+            this.$store.dispatch('initCampaigns').finally(() => {
+                this.setTitle();
+            });
+        },
+        setTitle(){
+            try {
+                const name = this.currentCampaignName;
+                const base = this.SITE_TITLE || '抽獎大師';
+                const baseDesc = this.SITE_DESC || '';
+                const title = name ? `${name} - ${base}` : base;
+                const desc = name ? `${name}｜${baseDesc}` : baseDesc;
+                document.title = title;
+                this.setMeta('description', desc);
+                this.setOG('og:title', title);
+                this.setOG('og:description', desc);
+            } catch (e) {}
+        },
+        setMeta(name, content){
+            try {
+                let tag = document.querySelector(`meta[name="${name}"]`);
+                if (!tag) {
+                    tag = document.createElement('meta');
+                    tag.setAttribute('name', name);
+                    document.head.appendChild(tag);
+                }
+                tag.setAttribute('content', content || '');
+            } catch (e) {}
+        },
+        setOG(property, content){
+            try {
+                let tag = document.querySelector(`meta[property="${property}"]`);
+                if (!tag) {
+                    tag = document.createElement('meta');
+                    tag.setAttribute('property', property);
+                    document.head.appendChild(tag);
+                }
+                tag.setAttribute('content', content || '');
+            } catch (e) {}
         },
         ...mapActions([]),
         ...mapMutations([]),

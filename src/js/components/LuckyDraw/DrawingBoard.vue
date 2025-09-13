@@ -95,7 +95,7 @@
 
                 <div class="form-section">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="h5 mb-0">參與者名單（虛擬清單）</div>
+                        <div class="h5 mb-0">參與者名單</div>
                         <div class="d-flex align-items-center">
                             <input class="form-control form-control-sm mr-2" style="width:200px" type="search" placeholder="搜尋姓名/暱稱" v-model="q" @input="onSearch" />
                             <small class="text-muted">共 {{ totalParticipants }} 人</small>
@@ -295,7 +295,7 @@ export default {
             if (this._rafId) cancelAnimationFrame(this._rafId);
             this._rafId = null;
         },
-        
+
         incLights(){
             let v = Number(this.stopAfterLights) || 0;
             v = Math.min(500, v + 5);
