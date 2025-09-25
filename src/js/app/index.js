@@ -54,7 +54,7 @@ const app = createApp({
         setTitle(){
             try {
                 const name = this.currentCampaignName;
-                const base = this.SITE_TITLE || '抽獎大師';
+                const base = this.SITE_TITLE || 'SwiftPick 瞬選抽籤｜跨活動即時抽獎、智能過濾與成果匯出';
                 const baseDesc = this.SITE_DESC || '';
                 const title = name ? `${name} - ${base}` : base;
                 const desc = name ? `${name}｜${baseDesc}` : baseDesc;
