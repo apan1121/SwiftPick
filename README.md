@@ -43,6 +43,26 @@
 - 音效：HTML5 Audio（資源於 `dist/mp3`）
 - 持久化：IndexedDB（見 `src/js/services/storage.js`）
 
+## 抽獎亂數流程（`src/js/services/random.js`）
+
+1. **整理可抽名單**：
+   - 取得原始參與者陣列，建立 `exclude` 集合（已中獎或手動剔除）。
+   - 透過 `arr.filter((x) => !exclude.has(x))` 產生 `pool`，若為空則直接返回 `null` 或空結果。
+2. **產生安全亂數索引**：
+   - `getRandomInt(max)` 建立 `Uint32Array(1)`，使用 `crypto.getRandomValues` 取 0～2³²-1 的均勻亂數。
+   - 透過 `Math.floor((array[0] / (0xffffffff + 1)) * max)` 將其縮放為 0～`max - 1` 範圍。
+3. **單人抽籤 `pickOne`**：
+   - 直接以第 2 步產生的索引從 `pool` 取出候選人，若 `pool` 為空返回 `null`。
+4. **多人唯一抽籤 `pickRandomDistinct`**：
+   - 初始化空陣列 `chosen` 與集合 `used`。
+   - 迴圈至多執行 `Math.min(k, pool.length)` 次；每次呼叫 `getRandomInt(pool.length)` 取索引。
+   - 若索引已存在於 `used`，持續重新抽直到取得未用過的索引（`while (used.has(idx))`）。
+   - 將新索引加入 `used` 並把對應參與者推入 `chosen`，確保本輪不重覆且不需排除名單。
+   - 迴圈結束後返回 `chosen`。
+5. **公平性重點**：
+   - 全程使用加密等級亂數來源，避免 `Math.random` 的可預測性。
+   - `exclude` 與 `used` 雙層防護，阻止已排除或本輪已抽中的 ID 再次出現。
+
 ## 目前進度（與規劃對照）
 
 - [x] 路由與頁面骨架：`/prizes` `/participants` `/drawing` `/results`
