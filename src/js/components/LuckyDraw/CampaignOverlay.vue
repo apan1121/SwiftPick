@@ -32,7 +32,7 @@
                     <div class="col-md-6 mb-3">
                         <h6 class="text-muted">新增活動</h6>
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="輸入活動名稱" v-model.trim="name" @keyup.enter="create" />
+                            <input type="text" class="form-control" placeholder="輸入活動名稱" v-model.trim="name" @keyup.enter.prevent />
                             <div class="input-group-append">
                                 <button class="btn btn-success" :disabled="!name" @click="create"><i class="fas fa-plus"></i> 建立</button>
                             </div>
@@ -52,6 +52,13 @@
         :min-length="1"
         @close="showRenameModal=false"
         @confirm="confirmRename"
+    />
+    <ConfirmModal
+        :show="showDelete"
+        title="刪除活動"
+        :message="deleteTarget ? `確定刪除活動「${deleteTarget.name}」？` : ''"
+        @close="showDelete=false"
+        @confirm="confirmDelete"
     />
 </template>
 
@@ -146,10 +153,3 @@ export default {
 .ld-list .chev{ opacity: .5; transition: opacity .12s ease, transform .12s ease; }
 .ld-list .list-group-item:hover .chev{ opacity: 1; transform: translateX(1px); }
 </style>
-<ConfirmModal
-    :show="showDelete"
-    title="刪除活動"
-    :message="deleteTarget ? `確定刪除活動「${deleteTarget.name}」？` : ''"
-    @close="showDelete=false"
-    @confirm="confirmDelete"
-/>

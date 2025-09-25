@@ -10,7 +10,13 @@
     >
         <div class="form-group mb-1">
             <label v-if="label" class="small text-muted">{{ label }}</label>
-            <input type="text" class="form-control" :placeholder="placeholder" v-model.trim="valueLocal" @keyup.enter="onConfirm" />
+            <input
+                type="text"
+                class="form-control"
+                :placeholder="placeholder"
+                v-model.trim="valueLocal"
+                @keyup.enter.prevent
+            />
         </div>
         <div v-if="hint" class="small text-muted">{{ hint }}</div>
     </Modal>
@@ -52,4 +58,3 @@ export default {
 
 <style scoped>
 </style>
-
