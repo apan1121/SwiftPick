@@ -18,12 +18,16 @@ export default {
                 if (Array.isArray(data.prizes)) commit('setPrizes', data.prizes);
                 if (Array.isArray(data.participants)) commit('setParticipants', data.participants);
                 if (data.currentPrizeId) commit('setCurrentPrizeId', data.currentPrizeId);
+                commit('setAnonymizeName', !!data.anonymizeName);
+                commit('setAnonymizeNickname', !!data.anonymizeNickname);
                 commit('setCurrentCampaign', { id: curId, name: '' });
             } else {
                 const data = await loadAll();
                 if (Array.isArray(data.prizes)) commit('setPrizes', data.prizes);
                 if (Array.isArray(data.participants)) commit('setParticipants', data.participants);
                 if (data.currentPrizeId) commit('setCurrentPrizeId', data.currentPrizeId);
+                commit('setAnonymizeName', !!data.anonymizeName);
+                commit('setAnonymizeNickname', !!data.anonymizeNickname);
             }
         } catch (e) {
             // eslint-disable-next-line no-console

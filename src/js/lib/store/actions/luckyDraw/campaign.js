@@ -72,6 +72,8 @@ export default {
         commit('setPrizes', Array.isArray(data.prizes) ? data.prizes : []);
         commit('setParticipants', Array.isArray(data.participants) ? data.participants : []);
         commit('setCurrentPrizeId', data.currentPrizeId || null);
+        commit('setAnonymizeName', !!data.anonymizeName);
+        commit('setAnonymizeNickname', !!data.anonymizeNickname);
         await setCurrentCampaignId(id);
         commit('setShowCampaignOverlay', false);
     },
@@ -82,6 +84,8 @@ export default {
                 prizes: state.prizes || [],
                 participants: state.participants || [],
                 currentPrizeId: state.currentPrizeId || null,
+                anonymizeName: state.anonymizeName || false,
+                anonymizeNickname: state.anonymizeNickname || false,
             });
             // update meta.updatedAt
             const list = await getCampaignsMeta();

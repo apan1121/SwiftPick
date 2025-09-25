@@ -59,13 +59,38 @@ export async function saveAll(state) {
         prizes: toPlain(state.prizes || []),
         participants: toPlain(state.participants || []),
         currentPrizeId: state.currentPrizeId || null,
+        anonymizeName: !!state.anonymizeName,
+        anonymizeNickname: !!state.anonymizeNickname,
+        anonymizeParticipants: !!state.anonymizeName && !!state.anonymizeNickname,
     };
     await setItem('state', payload);
 }
 
 export async function loadAll() {
     const payload = await getItem('state');
-    return payload || { prizes: [], participants: [], currentPrizeId: null };
+    if (!payload) {
+        return {
+            prizes: [],
+            participants: [],
+            currentPrizeId: null,
+            anonymizeName: false,
+            anonymizeNickname: false,
+        };
+    }
+    const legacy = Object.prototype.hasOwnProperty.call(payload, 'anonymizeParticipants')
+        ? !!payload.anonymizeParticipants
+        : false;
+    return {
+        prizes: Array.isArray(payload.prizes) ? payload.prizes : [],
+        participants: Array.isArray(payload.participants) ? payload.participants : [],
+        currentPrizeId: payload.currentPrizeId || null,
+        anonymizeName: Object.prototype.hasOwnProperty.call(payload, 'anonymizeName')
+            ? !!payload.anonymizeName
+            : legacy,
+        anonymizeNickname: Object.prototype.hasOwnProperty.call(payload, 'anonymizeNickname')
+            ? !!payload.anonymizeNickname
+            : legacy,
+    };
 }
 
 export async function clearAll() {
@@ -102,7 +127,29 @@ export async function setCurrentCampaignId(id) {
 
 export async function loadCampaign(id) {
     const payload = await getItem(campKey(id));
-    return payload || { prizes: [], participants: [], currentPrizeId: null };
+    if (!payload) {
+        return {
+            prizes: [],
+            participants: [],
+            currentPrizeId: null,
+            anonymizeName: false,
+            anonymizeNickname: false,
+        };
+    }
+    const legacy = Object.prototype.hasOwnProperty.call(payload, 'anonymizeParticipants')
+        ? !!payload.anonymizeParticipants
+        : false;
+    return {
+        prizes: Array.isArray(payload.prizes) ? payload.prizes : [],
+        participants: Array.isArray(payload.participants) ? payload.participants : [],
+        currentPrizeId: payload.currentPrizeId || null,
+        anonymizeName: Object.prototype.hasOwnProperty.call(payload, 'anonymizeName')
+            ? !!payload.anonymizeName
+            : legacy,
+        anonymizeNickname: Object.prototype.hasOwnProperty.call(payload, 'anonymizeNickname')
+            ? !!payload.anonymizeNickname
+            : legacy,
+    };
 }
 
 export async function saveCampaign(id, data) {
@@ -111,6 +158,9 @@ export async function saveCampaign(id, data) {
         prizes: toPlain(payload.prizes || []),
         participants: toPlain(payload.participants || []),
         currentPrizeId: payload.currentPrizeId || null,
+        anonymizeName: !!payload.anonymizeName,
+        anonymizeNickname: !!payload.anonymizeNickname,
+        anonymizeParticipants: !!payload.anonymizeName && !!payload.anonymizeNickname,
     };
     await setItem(campKey(id), safe);
 }

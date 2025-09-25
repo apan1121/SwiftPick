@@ -30,7 +30,10 @@
                                 </h6>
                                 <div v-if="pr.winners && pr.winners.length" class="alert alert-light border mt-2">
                                     <div v-for="p in winnersOfPrize(pr)" :key="p.id" class="winner-row d-flex align-items-center">
-                                        <span class="flex-grow-1"><i class="fas fa-check text-success"></i> {{ p.name }} <span class="text-muted">({{ p.nickname }})</span></span>
+                                        <span class="flex-grow-1">
+                                            <i class="fas fa-check text-success"></i> {{ displayName(p) }}
+                                            <span v-if="p.nickname" class="text-muted">({{ p.nickname }})</span>
+                                        </span>
                                     <button class="btn btn-sm btn-outline-danger" @click="removeWinner(pr, p)">取消中獎</button>
                                     </div>
                                 </div>
@@ -64,6 +67,7 @@
 <script>
 import LuckyDrawNav from './Nav.vue';
 import { mapGetters } from 'vuex';
+import { maskName } from 'lib/common/nameMask';
 import ConfirmModal from 'components/common/ConfirmModal.vue';
 
 export default {
@@ -77,6 +81,8 @@ export default {
             'participants',
             'prizes',
             'totalParticipants',
+            'anonymizeName',
+            'anonymizeNickname',
         ]),
         indexById(){
             const idx = new Map();
@@ -95,6 +101,22 @@ export default {
         },
     },
     methods: {
+        formatName(name){
+            const base = String(name || '');
+            return this.anonymizeName ? maskName(base) : base;
+        },
+        formatNickname(nickname){
+            const base = String(nickname || '');
+            return this.anonymizeNickname ? maskName(base) : base;
+        },
+        displayName(participant){
+            if (!participant) return '';
+            return this.formatName(participant.name);
+        },
+        displayNickname(participant){
+            if (!participant) return '';
+            return this.formatNickname(participant.nickname);
+        },
         winnersOfPrize(pr){
             const term = (this.q || '').trim().toLowerCase();
             const list = (pr.winners || []).map(id => this.indexById.get(id)).filter(Boolean);
@@ -105,7 +127,8 @@ export default {
         onConfirm(){ const fn = this.confirmAction; this.showConfirm = false; this.confirmAction = null; if (typeof fn === 'function') fn(); },
         onClose(){ this.showConfirm = false; this.confirmAction = null; },
         removeWinner(pr, p){
-            this.openConfirm(`確定取消 ${p.name} 的中獎資格？`, () => {
+            const display = this.displayName(p);
+            this.openConfirm(`確定取消 ${display} 的中獎資格？`, () => {
                 this.$store.dispatch('unmarkWinners', [p.id]);
                 this.$store.dispatch('removeWinnersFromPrize', { prizeId: pr.id, winnerIds: [p.id] });
             });

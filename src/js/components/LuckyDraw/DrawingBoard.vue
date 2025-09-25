@@ -58,7 +58,10 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="h5 mb-0">抽獎動畫</div>
                         <div v-if="pendingWinner" class="confirm-actions">
-                            <span class="mr-2">候選中獎者：<strong>{{ pendingWinner.name }}</strong> <small class="text-muted">({{ pendingWinner.nickname }})</small></span>
+                            <span class="mr-2">
+                                候選中獎者：<strong>{{ pendingWinnerDisplayName }}</strong>
+                                <small v-if="pendingWinner.nickname" class="text-muted">({{ pendingWinnerDisplayNickname }})</small>
+                            </span>
                             <button class="btn btn-success btn-sm mr-2" @click="confirmWinner">確定</button>
                             <button class="btn btn-outline-danger btn-sm" @click="rejectWinner">取消</button>
                         </div>
@@ -115,8 +118,8 @@
                             <div class="vrow">
                                 <div v-for="p in item.cols" :key="p.id" class="participant-col">
                                     <div class="participant-card" :class="{ winner: p.isWinner, highlighted: isHighlighted(p.id) }">
-                                        <div class="name">{{ p.name }}</div>
-                                        <div class="nick">{{ p.nickname }}</div>
+                                        <div class="name">{{ displayName(p) }}</div>
+                                        <div class="nick">{{ displayNickname(p) }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -148,6 +151,7 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 import { mapGetters, mapActions } from 'vuex';
 import { pickRandomDistinct, pickOne } from 'services/random';
 import { playStart, playTick, playWinner } from 'services/sound';
+import { maskName } from 'lib/common/nameMask';
 
 export default {
     name: 'DrawingBoard',
@@ -185,6 +189,8 @@ export default {
             'currentPrize',
             'isDrawing',
             'lightCount',
+            'anonymizeName',
+            'anonymizeNickname',
         ]),
         participantsMap(){
             const m = new Map();
@@ -220,11 +226,23 @@ export default {
         },
         currentAnimName(){
             const p = this.currentAnimParticipant;
-            return p ? (p.name || '') : '';
+            const name = p ? (p.name || '') : '';
+            return this.formatName(name);
         },
         currentAnimNickname(){
             const p = this.currentAnimParticipant;
-            return p ? (p.nickname || '') : '';
+            const nickname = p ? (p.nickname || '') : '';
+            return this.formatNickname(nickname);
+        },
+        pendingWinnerDisplayNickname(){
+            const p = this.pendingWinner;
+            const nickname = p ? (p.nickname || '') : '';
+            return this.formatNickname(nickname);
+        },
+        pendingWinnerDisplayName(){
+            const p = this.pendingWinner;
+            const name = p ? (p.name || '') : '';
+            return this.formatName(name);
         },
         eligibleCount(){
             return (this.participants || []).filter(p => !p.isWinner).length;
@@ -247,6 +265,22 @@ export default {
             'addWinnersToPrize',
             'markWinners',
         ]),
+        formatName(name){
+            const base = String(name || '');
+            return this.anonymizeName ? maskName(base) : base;
+        },
+        formatNickname(nickname){
+            const base = String(nickname || '');
+            return this.anonymizeNickname ? maskName(base) : base;
+        },
+        displayName(participant){
+            if (!participant) return '';
+            return this.formatName(participant.name);
+        },
+        displayNickname(participant){
+            if (!participant) return '';
+            return this.formatNickname(participant.nickname);
+        },
         onSearch(){
             this.setSearchTerm(this.q);
         },
@@ -382,8 +416,10 @@ export default {
             }
             // 橫幅提示
             const p = this.pendingWinner;
-            const name = p.nickname ? `${p.name} (${p.nickname})` : p.name;
-            this.winnerBannerText = `中獎者：${name}`;
+            const display = this.displayName(p);
+            const nick = this.displayNickname(p);
+            const label = p.nickname ? `${display} (${nick})` : display;
+            this.winnerBannerText = `中獎者：${label}`;
             this.showWinnerBanner = true;
             setTimeout(() => { this.showWinnerBanner = false; }, 2500);
             this.pendingWinner = null;

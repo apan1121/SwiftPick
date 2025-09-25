@@ -10,6 +10,18 @@ export default {
     setSearchTerm({ commit }, term){
         commit('setSearchTerm', term);
     },
+    setAnonymizeName({ commit, dispatch }, flag){
+        commit('setAnonymizeName', flag);
+        dispatch('saveToStorage');
+    },
+    setAnonymizeNickname({ commit, dispatch }, flag){
+        commit('setAnonymizeNickname', flag);
+        dispatch('saveToStorage');
+    },
+    setAnonymizeParticipants({ commit, dispatch }, flag){
+        commit('setAnonymizeParticipants', flag);
+        dispatch('saveToStorage');
+    },
     markWinners({ commit, dispatch }, winnerIds){
         commit('markWinners', winnerIds);
         dispatch('saveToStorage');

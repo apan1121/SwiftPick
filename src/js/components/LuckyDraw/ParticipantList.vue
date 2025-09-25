@@ -13,6 +13,14 @@
                             <i class="fas fa-upload"></i> 匯入CSV
                             <input ref="fileInput" type="file" accept=".csv" class="d-none" @change="onFileChange" />
                         </label>
+                        <div class="form-check form-check-inline mb-0 align-self-center ml-md-2">
+                            <input class="form-check-input" type="checkbox" id="toggleAnonymizeName" v-model="anonymizeNameToggle">
+                            <label class="form-check-label" for="toggleAnonymizeName">匿名姓名</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0 align-self-center">
+                            <input class="form-check-input" type="checkbox" id="toggleAnonymizeNickname" v-model="anonymizeNicknameToggle">
+                            <label class="form-check-label" for="toggleAnonymizeNickname">匿名暱稱</label>
+                        </div>
                     </div>
                 </div>
 
@@ -82,11 +90,31 @@ export default {
         ...mapGetters([
             'participants',
             'totalParticipants',
+            'anonymizeName',
+            'anonymizeNickname',
         ]),
+        anonymizeNameToggle: {
+            get(){
+                return this.anonymizeName;
+            },
+            set(v){
+                this.setAnonymizeName(!!v);
+            },
+        },
+        anonymizeNicknameToggle: {
+            get(){
+                return this.anonymizeNickname;
+            },
+            set(v){
+                this.setAnonymizeNickname(!!v);
+            },
+        },
     },
     methods: {
         ...mapActions([
             'setParticipants',
+            'setAnonymizeName',
+            'setAnonymizeNickname',
         ]),
         manualSave(){
             this.$store.dispatch('saveToStorage');
