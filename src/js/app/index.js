@@ -22,8 +22,9 @@ const app = createApp({
     filters: {},
     data(){
         return {
-            SITE_TITLE: '抽獎大師',
-            SITE_DESC: '專業等級抽獎工具：公平隨機、流暢動畫、結果匯出與本機保存；適合 FB 粉專、公司尾牙。',
+            SITE_TITLE: 'SwiftPick 瞬選抽籤｜跨活動即時抽獎、智能過濾與成果匯出',
+            SITE_DESC: 'SwiftPick 瞬選抽籤支援大規模名單管理，提供搜尋篩選、候選確認與抽獎結果匯出，適合現場或線上抽獎活動即時運作。',
+            SITE_KEYWORDS: 'SwiftPick, 瞬選抽籤, 即時抽獎系統, 名單搜尋篩選, 候選確認流程, 抽獎結果匯出',
         };
     },
     computed: {
@@ -59,6 +60,7 @@ const app = createApp({
                 const desc = name ? `${name}｜${baseDesc}` : baseDesc;
                 document.title = title;
                 this.setMeta('description', desc);
+                this.setMeta('keywords', this.SITE_KEYWORDS || '');
                 this.setOG('og:title', title);
                 this.setOG('og:description', desc);
             } catch (e) {}
