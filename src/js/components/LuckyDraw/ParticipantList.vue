@@ -8,7 +8,7 @@
                     <div class="header-actions d-flex flex-wrap mt-2 mt-md-0">
                         <button class="btn btn-outline-secondary btn-sm mr-1" @click="manualSave"><i class="fas fa-save"></i> 手動儲存</button>
                         <button class="btn btn-outline-danger btn-sm mr-1" :disabled="!participants.length" @click="clearAll"><i class="fas fa-trash"></i> 清空名單</button>
-                        <button class="btn btn-outline-success btn-sm" :disabled="!participants.length" @click="exportCsv"><i class="fas fa-download"></i> 匯出CSV</button>
+                        <button class="btn btn-outline-success btn-sm" :disabled="!participants.length" @click="openExportOptions"><i class="fas fa-download"></i> 匯出CSV</button>
                         <label class="btn btn-outline-primary btn-sm mb-0">
                             <i class="fas fa-upload"></i> 匯入CSV
                             <input ref="fileInput" type="file" accept=".csv" class="d-none" @change="onFileChange" />
@@ -64,6 +64,26 @@
                 @close="onClose"
                 @confirm="onConfirm"
             />
+            <ConfirmModal
+                :show="showExportModal"
+                title="匯出參與者名單"
+                message="勾選以下選項後，對應欄位會以遮罩處理；未勾選則保留原始資料。"
+                confirm-text="匯出"
+                cancel-text="取消"
+                @close="closeExportOptions"
+                @confirm="confirmExport"
+            >
+                <div class="mt-3">
+                    <div class="form-check mb-2">
+                        <input id="exportMaskName" v-model="exportAnonymizeName" type="checkbox" class="form-check-input">
+                        <label class="form-check-label" for="exportMaskName">匿名姓名</label>
+                    </div>
+                    <div class="form-check">
+                        <input id="exportMaskNickname" v-model="exportAnonymizeNickname" type="checkbox" class="form-check-input">
+                        <label class="form-check-label" for="exportMaskNickname">匿名暱稱</label>
+                    </div>
+                </div>
+            </ConfirmModal>
         </div>
     </div>
 </template>
@@ -73,6 +93,7 @@ import LuckyDrawNav from './Nav.vue';
 import { mapActions, mapGetters } from 'vuex';
 import ConfirmModal from 'components/common/ConfirmModal.vue';
 import { parseText, parseCsvFile, parseParticipantsRows, generateParticipants } from 'services/csv';
+import { maskName } from 'lib/common/nameMask';
 
 export default {
     name: 'ParticipantList',
@@ -84,6 +105,9 @@ export default {
             showConfirm: false,
             confirmMessage: '',
             confirmAction: null,
+            showExportModal: false,
+            exportAnonymizeName: false,
+            exportAnonymizeNickname: false,
         };
     },
     computed: {
@@ -148,8 +172,29 @@ export default {
                 this.$store.dispatch('saveToStorage');
             });
         },
-        exportCsv(){
-            const lines = (this.participants || []).map(p => `${p.name},${p.nickname || ''}`);
+        openExportOptions(){
+            this.showExportModal = true;
+            this.exportAnonymizeName = !!this.anonymizeName;
+            this.exportAnonymizeNickname = !!this.anonymizeNickname;
+        },
+        closeExportOptions(){
+            this.showExportModal = false;
+            this.exportAnonymizeName = false;
+            this.exportAnonymizeNickname = false;
+        },
+        confirmExport(){
+            this.exportParticipantsCsv({ maskName: this.exportAnonymizeName, maskNickname: this.exportAnonymizeNickname });
+        },
+        exportParticipantsCsv({ maskName: maskNameFlag = false, maskNickname: maskNicknameFlag = false } = {}){
+            this.showExportModal = false;
+            this.exportAnonymizeName = false;
+            this.exportAnonymizeNickname = false;
+            const lines = (this.participants || []).map((p) => {
+                const name = maskNameFlag ? maskName(p.name || '') : (p.name || '');
+                const nickname = maskNicknameFlag ? maskName(p.nickname || '') : (p.nickname || '');
+                return `${name},${nickname}`;
+            });
+            if (!lines.length) return;
             const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
